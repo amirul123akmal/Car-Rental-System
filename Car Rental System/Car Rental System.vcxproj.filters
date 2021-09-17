@@ -21,5 +21,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\database.txt" />
+    <Text Include="res\history.txt" />
   </ItemGroup>
 </Project>
