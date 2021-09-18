@@ -4,6 +4,7 @@
 #include <sstream> // std::stringstream
 #include <time.h> // time
 #include <thread> // sleep_for
+#include <vector> // std::vector
 #include <chrono> // second
 
 #define CONSOLE(x) std::cout << x << std::endl
@@ -13,7 +14,7 @@ class application
 {
 	std::string numPlate;
 	float timeDelta = 0;
-	int choices = 0, line_counter = 0;
+	int choices = 0, lineCounter = 0;
 
 	std::string getTime()
 	{
@@ -42,7 +43,12 @@ class application
 				if (plate == numPlate)
 				{
 					enabled = true;
+					lineCounter++; 
 					continue;
+				}
+				if (!enabled)
+				{
+					lineCounter++;
 				}
 				if (enabled)
 				{
@@ -69,6 +75,44 @@ class application
 		}
 		return timeDelta * (float)5;
 
+	}
+	void clearStore(float& price)
+	{
+		// Initialization and setup for remove from database.txt and move it to history.txt
+		std::ifstream file("res/database.txt", std::ios::in);
+		std::ofstream tempFile("res/temp.txt", std::ios::out);
+		std::ofstream history("res/history.txt", std::ios::app);
+
+		// storing all the data into array
+		std::vector<std::string> dbData{};
+		std::string temp, temp2;
+		while (!file.eof())
+		{
+			file >> temp;
+			dbData.push_back(temp);
+		}
+		file.close();
+		// last line gets duplicated
+		// so we need to remove it
+		dbData.pop_back();
+
+		temp = dbData[--lineCounter] + "\n";
+		int cap = dbData.capacity();
+		dbData.erase(dbData.begin() - (lineCounter));
+		// -2 because -1 = remove the 1 we wanted to, -1 = remove the last duplicated line
+		int limit = dbData.capacity() - 2;
+		int counter = 0;
+		while (counter < limit)
+		{
+			temp2 = dbData[counter++] + "\n";
+			tempFile << temp2;
+		}
+		tempFile.close();
+		history << temp;
+		history.close();
+
+		system("del res\\database.txt");
+		system("rename res\\temp.txt database.txt");
 	}
 public:
 	int get()
@@ -117,13 +161,18 @@ public:
 		std::getline(std::cin, numPlate, '\n');
 		if (checkCredential())
 		{
-			float price = getPrice();
+			float price = std::ceil(getPrice() * 100) / 100;
 			float pay;
 		again:
+			pay = 0;
+			CONSOLE("Enter 123 to exit");
 			printf("Please pay : RM %.2f", price);
-			LOG("Money: ");
-			std::cin.ignore();
+			LOG("\nMoney: ");
 			std::cin >> pay;
+			if ( pay == 123)
+			{
+				goto exit;
+			}
 			if (pay != price)
 			{
 				clear();
@@ -131,6 +180,10 @@ public:
 				std::this_thread::sleep_for(std::chrono::seconds(3));
 				goto again;
 			}
+			clearStore(price);
+
+		exit:
+			CONSOLE("");
 		}
 	}
 };
@@ -150,6 +203,7 @@ starting:
 		break;
 	case 2:
 		app.payBack();
+		goto starting;
 		break;
 	default:
 		if (app.get() == 123456)
