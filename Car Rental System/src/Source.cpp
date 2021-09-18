@@ -63,11 +63,11 @@ class application
 	}
 	float getPrice()
 	{
-		if ( ( timeDelta / 60 ) < 1.01)
+		if ( ( timeDelta / ( 60 * 60 * 60 * 24 ) ) < 1.01)
 		{
 			return 0;
 		}
-		timeDelta /= 60;
+		timeDelta /= ( 60 * 60 * 60 * 24 );
 		if (timeDelta > 5)
 		{
 			timeDelta -= 5;
@@ -143,9 +143,9 @@ public:
 		choices = 0;
 		CONSOLE(
 			"=====PRICE RATE=====\n"
-			"First 1 Hour free\n"
-			"1 Hour = RM 5.00\n"
-			"\nAfter 5 Hour , 1 hour = RM 6.00 \n"
+			"First 1 Day free\n"
+			"1 Day = RM 5.00\n"
+			"\nAfter 7 Days, 1 Day = RM 6.00 \n"
 			"====================\n"
 		);
 		CONSOLE("1. Register your car");
